@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bulk Trade Quiz</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .quiz-container {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+      padding: 30px;
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 26px;
+      margin-bottom: 20px;
+      color: #00d4ff;
+    }
+
+    .question {
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    button {
+      background-color: #00d4ff;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: 10px;
+      cursor: pointer;
+      transition: background 0.3s;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #00a8cc;
+    }
+
+    .next-btn {
+      margin-top: 20px;
+      background: #1de9b6;
+    }
+
+    .score {
+      font-size: 22px;
+      color: #fff;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <h1>Bulk Trade Docs Quiz</h1>
+    <div id="quiz">
+      <div class="question" id="question"></div>
+      <div class="options" id="options"></div>
+      <button class="next-btn" id="nextBtn" style="display:none;">Next</button>
+    </div>
+    <div class="score" id="score"></div>
+  </div>
+
+  <script>
+    const quizData = [
+      {
+        question: "What is the core purpose of BULK Exchange?",
+        options: [
+          "A. A lending protocol for stablecoins",
+          "B. A decentralized swap (AMM) platform",
+          "C. A high-performance orderbook bridging speed and decentralization",
+          "D. A platform for NFT minting"
+        ],
+        answer: 2
+      },
+      {
+        question: "In BULK T1 architecture, what component handles in-memory matching?",
+        options: ["A. BULK Net", "B. BULK Tile", "C. BULK Db", "D. Commit Path"],
+        answer: 1
+      },
+      {
+        question: "What does the Commit Path do in BULK architecture?",
+        options: [
+          "A. Transmits orders across the network",
+          "B. Stores trade logs in the database",
+          "C. Batches state updates and commits to Solana",
+          "D. Runs the user interface"
+        ],
+        answer: 2
+      },
+      {
+        question: "Which mechanism prevents self-trading on BULK?",
+        options: [
+          "A. Auto Deleveraging",
+          "B. Liquidation Engine",
+          "C. Self-Trade Prevention (STP)",
+          "D. Price Indices"
+        ],
+        answer: 2
+      },
+      {
+        question: "What are the two margin modes supported on BULK?",
+        options: [
+          "A. Fixed and Floating",
+          "B. Cross Margin and Isolated Margin",
+          "C. Portfolio Margin and Maintenance Margin",
+          "D. Deferred Margin and Immediate Margin"
+        ],
+        answer: 1
+      },
+      {
+        question: "What is a reduce-only order?",
+        options: [
+          "A. Only opens new positions",
+          "B. Only reduces or closes an existing position",
+          "C. Increases leverage",
+          "D. Delays execution"
+        ],
+        answer: 1
+      },
+      {
+        question: "What does 'finality' refer to in BULK?",
+        options: [
+          "A. Trade transmission time",
+          "B. Economic and settlement finality on Solana",
+          "C. Order cancel moment",
+          "D. UI load time"
+        ],
+        answer: 1
+      },
+      {
+        question: "What is the Orderbook in BULK?",
+        options: [
+          "A. Record of user accounts",
+          "B. Central limit order book for perpetual markets",
+          "C. List of all liquidations",
+          "D. History of API calls"
+        ],
+        answer: 1
+      },
+      {
+        question: "Which instruments and leverage tiers are on BULK Alphanet?",
+        options: [
+          "A. Only BTC/USD with 5×",
+          "B. BTC, ETH, SOL / USD each with 20×",
+          "C. Only stablecoins with no leverage",
+          "D. SOL/USD with 50×"
+        ],
+        answer: 1
+      },
+      {
+        question: "What is leaderless decentralization in BULK?",
+        options: [
+          "A. Single sequencer controls ordering",
+          "B. No central block producer or sequencer",
+          "C. No consensus at all",
+          "D. One node runs all logic"
+        ],
+        answer: 1
+      }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+
+    const questionEl = document.getElementById("question");
+    const optionsEl = document.getElementById("options");
+    const nextBtn = document.getElementById("nextBtn");
+    const scoreEl = document.getElementById("score");
+
+    function loadQuestion() {
+      const q = quizData[currentQuestion];
+      questionEl.textContent = q.question;
+      optionsEl.innerHTML = "";
+      q.options.forEach((opt, index) => {
+        const btn = document.createElement("button");
+        btn.textContent = opt;
+        btn.addEventListener("click", () => checkAnswer(index));
+        optionsEl.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(selected) {
+      const correct = quizData[currentQuestion].answer;
+      if (selected === correct) {
+        score++;
+      }
+      nextBtn.style.display = "block";
+      const buttons = optionsEl.querySelectorAll("button");
+      buttons.forEach((b, i) => {
+        b.disabled = true;
+        if (i === correct) b.style.backgroundColor = "#1de9b6";
+        else if (i === selected && i !== correct) b.style.backgroundColor = "#ff1744";
+      });
+    }
+
+    nextBtn.addEventListener("click", () => {
+      currentQuestion++;
+      if (currentQuestion < quizData.length) {
+        loadQuestion();
+        nextBtn.style.display = "none";
+      } else {
+        showScore();
+      }
+    });
+
+    function showScore() {
+      document.getElementById("quiz").style.display = "none";
+      scoreEl.innerHTML = 🎯 You scored ${score} out of ${quizData.length}!;
+    }
+
+    loadQuestion();
+  </script>
+</body>
+</html>
